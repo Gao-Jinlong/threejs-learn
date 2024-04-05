@@ -1,10 +1,4 @@
-import React, { useEffect } from "react";
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useNavigation,
-} from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import "./index.scss";
 
 export default function Layout() {
@@ -29,6 +23,7 @@ function NavbarItem(props: { name: string; path: string; title: string }) {
   const navigate = useNavigate();
 
   function onClick() {
+    document.title = title;
     navigate(path);
   }
 

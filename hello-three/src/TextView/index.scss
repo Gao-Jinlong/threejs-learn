@@ -1,0 +1,16 @@
+.text-view-control {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba($color: #ffffff, $alpha: 0.2);
+  user-select: none;
+
+  &__item {
+    padding: 20px;
+
+    &:hover {
+      background: rgba($color: #ffffff, $alpha: 0.4);
+      cursor: pointer;
+    }
+  }
+}

@@ -1,55 +1,22 @@
 import * as THREE from "three";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import useTHREEScene from "../hooks/useTHREEScene";
 
 export default function RotationCube() {
   const container = useRef<HTMLDivElement>(null);
 
-  const renderer = useRef<THREE.WebGLRenderer | null>(null);
-  const camera = useRef<THREE.PerspectiveCamera | null>(null);
-  const scene = useRef<THREE.Scene | null>(null);
-
-  useEffect(() => {
-    renderer.current = new THREE.WebGLRenderer();
-    renderer.current.setSize(window.innerWidth, window.innerHeight);
-    // 固定引用，防止清理函数时引用变化导致错误
-    const currentContainer = container.current;
-
-    if (currentContainer) {
-      currentContainer.appendChild(renderer.current.domElement);
-    }
-
-    camera.current = new THREE.PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      1,
-      500
-    );
-    camera.current.position.set(0, 0, 5);
-    camera.current.lookAt(0, 0, 0);
-
-    scene.current = new THREE.Scene();
-    renderer.current.render(scene.current, camera.current);
-
-    animate();
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.current?.render(scene.current!, camera.current!);
-    }
-
-    // 清理函数副作用
-    return () => {
-      if (currentContainer) {
-        currentContainer.removeChild(renderer.current!.domElement);
-      }
-    };
-  }, []);
+  const { scene } = useTHREEScene({ container });
 
   useEffect(() => {
     const cube = drawRotateCube();
     const line = drawLine();
 
-    scene.current?.add(line, cube);
-  }, []);
+    scene.add(line, cube);
+
+    return () => {
+      scene.remove(line, cube);
+    };
+  }, [scene]);
 
   function drawRotateCube() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
