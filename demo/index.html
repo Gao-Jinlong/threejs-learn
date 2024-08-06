@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+      import { UVsDebug } from "three/addons/utils/UVsDebug.js";
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        20,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0xffffff, 1);
+      document.body.appendChild(renderer.domElement);
+
+      const width = 14;
+      const height = 11.2;
+      const depth = 1.25;
+      const borderWidth = 1.25; // 侧面宽度侧面宽度
+
+      const geometry = createCustomBoxGeometry(
+        width,
+        height,
+        depth,
+        borderWidth
+      );
+
+      // 加载贴图
+      const texture = new THREE.TextureLoader().load("./image.png");
+      texture.colorSpace = THREE.SRGBColorSpace;
+
+      // 创建材质
+      const material = new THREE.MeshStandardMaterial({
+        map: texture,
+        normalMap: texture,
+        side: THREE.DoubleSide, // 确保两面都能看到贴图
+        roughness: 0.8,
+        metalness: 0.2,
+      });
+
+      // 创建网格
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+
+      createLight();
+
+      function createCustomBoxGeometry(width, height, depth, borderWidth) {
+        // const geometry = new RoundedBoxGeometry(
+        //   width,
+        //   height,
+        //   depth,
+        //   depth,
+        //   0.2
+        // );
+        const geometry = new THREE.BoxGeometry(width, height, depth);
+
+        const uvs = geometry.attributes.uv;
+        const positions = geometry.attributes.position;
+        console.log("🚀 ~ createCustomBoxGeometry ~ uvs:", uvs);
+        const faceNumber = 4;
+
+        // TODO: uv 映射方式调整
+        for (let i = 0; i < uvs.count; i++) {
+          if (i >= faceNumber * 4 && i < faceNumber * 4 + 4) {
+            if (i === faceNumber * 4) {
+              uvs.setXY(3 / 17, 3 / 17);
+            } else if (i === (faceNumber + 1) * 4) {
+              uvs.setXY(3 / 17, 14 / 17);
+            } else if (i === (faceNumber + 2) * 4) {
+              uvs.setXY(14 / 17, 14 / 17);
+            } else if (i === (faceNumber + 3) * 4) {
+              uvs.setXY(14 / 17, 3 / 17);
+            }
+          } else {
+            uvs.setXY(1, 1);
+          }
+        }
+
+        geometry.uvsNeedUpdate = true;
+
+        document.body.appendChild(UVsDebug(geometry));
+        console.log("🚀 ~ createCustomBoxGeometry ~ uvs:", uvs);
+
+        return geometry;
+      }
+
+      function createLight() {
+        const ambientLight = new THREE.AmbientLight(0xffffff, 5);
+        scene.add(ambientLight);
+      }
+
+      camera.position.z = 70;
+      camera.position.x = -30;
+      camera.lookAt(0, 0, 0);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      const animate = function () {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      };
+      animate();
+    </script>
+  </body>
+</html>
